@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>David Ben-Ezra</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      color: #2c2c2c;
+      overflow-x: hidden;
+    }
+
+    /* ── HAMBURGER MENU ── */
+    .menu-btn {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 100;
+      background: rgba(10, 20, 45, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .menu-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #ffffff;
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+
+    .menu-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .menu-btn.open span:nth-child(2) { opacity: 0; }
+    .menu-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .nav-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100%;
+      background: rgba(6, 14, 32, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 99;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      padding: 90px 24px 32px;
+    }
+
+    .nav-drawer.open {
+      transform: translateX(0);
+    }
+
+    .nav-drawer a {
+      display: block;
+      color: #ffffff;
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .nav-drawer a:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      background: linear-gradient(to bottom, #020810 0%, #041525 45%, #071e38 75%, #0d2a4a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding-bottom: 220px; /* room for skyline */
+    }
+
+    /* Stars */
+    .stars {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* Skyline pinned to bottom of hero */
+    .skyline {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    /* Profile card centered in hero */
+    .profile {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .photo-wrapper {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      background: linear-gradient(135deg, #1a4a80, #2d6a9f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .photo-placeholder {
+      font-size: 54px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .photo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .name {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .title-tag {
+      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.55);
+      font-style: italic;
+    }
+
+    /* ── BIO ── */
+    .content {
+      background: #f6f5f1;
+      padding: 60px 80px;
+      width: 100%;
+    }
+
+    .bio-heading {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1a3a5c;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .bio {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #333;
+      max-width: 920px;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    .bio p + p {
+      margin-top: 18px;
+    }
+
+    /* ── SKYLINE PHOTO ── */
+    .skyline-photo {
+      width: 100%;
+      line-height: 0;
+      display: block;
+    }
+
+    /* ── CONTACT ── */
+    .contact {
+      background: #0d1a30;
+      padding: 60px 80px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .contact-heading {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 32px;
+    }
+
+    .contact-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #6bbfff;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .contact-link:hover {
+      opacity: 0.7;
+    }
+
+    .contact-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #060c18;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 16px 80px;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.25);
+    }
+
+    @media (max-width: 700px) {
+      .hero { padding-bottom: 140px; }
+      .name { font-size: 2.2rem; }
+      .content { padding: 40px 24px; }
+      .contact { padding: 40px 24px; }
+      .footer { padding: 16px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hamburger button -->
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Side drawer -->
+  <nav class="nav-drawer" id="navDrawer">
+    <a href="#about" id="aboutLink">About Me</a>
+    <a href="#contact" id="contactLink">Contact</a>
+  </nav>
+
+  <div class="hero">
+
+    <!-- Stars -->
+    <svg class="stars" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="72"   cy="28"  r="1"   fill="white" opacity="0.9"/>
+      <circle cx="145"  cy="55"  r="0.8" fill="white" opacity="0.7"/>
+      <circle cx="210"  cy="18"  r="1.2" fill="white" opacity="0.8"/>
+      <circle cx="310"  cy="42"  r="0.9" fill="white" opacity="0.6"/>
+      <circle cx="412"  cy="14"  r="1"   fill="white" opacity="0.9"/>
+      <circle cx="480"  cy="62"  r="0.7" fill="white" opacity="0.7"/>
+      <circle cx="550"  cy="30"  r="1.1" fill="white" opacity="0.8"/>
+      <circle cx="635"  cy="50"  r="0.8" fill="white" opacity="0.6"/>
+      <circle cx="720"  cy="20"  r="1"   fill="white" opacity="0.9"/>
+      <circle cx="800"  cy="45"  r="0.9" fill="white" opacity="0.7"/>
+      <circle cx="890"  cy="16"  r="1.2" fill="white" opacity="0.8"/>
+      <circle cx="960"  cy="65"  r="0.7" fill="white" opacity="0.6"/>
+      <circle cx="1040" cy="32"  r="1"   fill="white" opacity="0.9"/>
+      <circle cx="1120" cy="52"  r="0.8" fill="white" opacity="0.7"/>
+      <circle cx="1200" cy="20"  r="1.1" fill="white" opacity="0.8"/>
+      <circle cx="1280" cy="40"  r="0.9" fill="white" opacity="0.6"/>
+      <circle cx="1360" cy="14"  r="1"   fill="white" opacity="0.9"/>
+      <circle cx="1420" cy="58"  r="0.8" fill="white" opacity="0.7"/>
+      <circle cx="38"   cy="90"  r="0.8" fill="white" opacity="0.5"/>
+      <circle cx="180"  cy="105" r="1"   fill="white" opacity="0.7"/>
+      <circle cx="265"  cy="82"  r="0.7" fill="white" opacity="0.6"/>
+      <circle cx="380"  cy="98"  r="0.9" fill="white" opacity="0.8"/>
+      <circle cx="490"  cy="88"  r="1"   fill="white" opacity="0.5"/>
+      <circle cx="580"  cy="110" r="0.8" fill="white" opacity="0.7"/>
+      <circle cx="670"  cy="80"  r="1.1" fill="white" opacity="0.6"/>
+      <circle cx="755"  cy="100" r="0.7" fill="white" opacity="0.8"/>
+      <circle cx="850"  cy="85"  r="0.9" fill="white" opacity="0.5"/>
+      <circle cx="940"  cy="105" r="1"   fill="white" opacity="0.7"/>
+      <circle cx="1030" cy="78"  r="0.8" fill="white" opacity="0.6"/>
+      <circle cx="1110" cy="100" r="1"   fill="white" opacity="0.8"/>
+      <circle cx="1195" cy="92"  r="0.7" fill="white" opacity="0.5"/>
+      <circle cx="1310" cy="108" r="0.9" fill="white" opacity="0.7"/>
+      <circle cx="1395" cy="85"  r="1"   fill="white" opacity="0.6"/>
+      <circle cx="100"  cy="145" r="0.8" fill="white" opacity="0.4"/>
+      <circle cx="230"  cy="130" r="0.9" fill="white" opacity="0.5"/>
+      <circle cx="360"  cy="150" r="0.7" fill="white" opacity="0.4"/>
+      <circle cx="470"  cy="138" r="1"   fill="white" opacity="0.5"/>
+      <circle cx="600"  cy="155" r="0.8" fill="white" opacity="0.4"/>
+      <circle cx="700"  cy="128" r="0.9" fill="white" opacity="0.5"/>
+      <circle cx="820"  cy="148" r="0.7" fill="white" opacity="0.4"/>
+      <circle cx="920"  cy="135" r="1"   fill="white" opacity="0.5"/>
+      <circle cx="1050" cy="152" r="0.8" fill="white" opacity="0.4"/>
+      <circle cx="1150" cy="125" r="0.9" fill="white" opacity="0.5"/>
+      <circle cx="1270" cy="142" r="0.7" fill="white" opacity="0.4"/>
+      <circle cx="1380" cy="158" r="0.8" fill="white" opacity="0.4"/>
+    </svg>
+
+    <!-- Profile -->
+    <div class="profile">
+      <div class="photo-wrapper">
+        <img src="photo.png" alt="David Ben-Ezra" />
+      </div>
+      <h1 class="name">David Ben-Ezra</h1>
+      <p class="title-tag">Strategic Finance &amp; Operations</p>
+    </div>
+
+    <!-- Boston Skyline at Night -->
+    <svg class="skyline" viewBox="0 0 1440 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+      <defs>
+        <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0d2a50" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#020810" stop-opacity="1"/>
+        </linearGradient>
+        <linearGradient id="buildingGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0e2040"/>
+          <stop offset="100%" stop-color="#040d1e"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Water -->
+      <rect x="0" y="210" width="1440" height="90" fill="url(#waterGrad)"/>
+      <line x1="0" y1="225" x2="1440" y2="225" stroke="rgba(80,140,210,0.07)" stroke-width="1.5"/>
+      <line x1="0" y1="242" x2="1440" y2="242" stroke="rgba(80,140,210,0.05)" stroke-width="2"/>
+      <line x1="0" y1="262" x2="1440" y2="262" stroke="rgba(80,140,210,0.04)" stroke-width="1.5"/>
+
+      <!-- Building silhouette — Boston skyline -->
+      <path fill="url(#buildingGrad)" d="
+        M 0,300
+        L 0,175
+        L 30,175   L 30,185
+        L 55,185   L 55,162
+        L 85,162   L 85,175
+        L 110,175  L 110,150
+        L 140,150  L 140,163
+        L 160,163  L 160,142
+        L 185,142  L 185,155
+        L 205,155  L 205,135
+        L 225,135  L 225,150
+        L 240,150  L 240,105
+        L 258,105  L 258,118
+        L 272,118
+        L 272,40   L 278,33   L 284,40
+        L 284,118
+        L 290,118  L 290,133
+        L 305,133  L 305,115
+        L 320,115  L 320,133
+        L 335,133  L 335,115
+        L 350,115  L 350,135
+        L 362,135
+        L 362,50   L 366,35   L 370,22
+        L 392,22   L 395,0    L 398,22
+        L 428,22   L 432,35   L 436,50
+        L 436,152
+        L 455,152  L 455,142
+        L 475,142  L 475,158
+        L 495,158  L 495,132
+        L 520,132  L 520,148
+        L 540,148  L 540,127
+        L 565,127  L 565,142
+        L 590,142  L 590,122
+        L 615,122  L 615,138
+        L 640,138  L 640,108
+        L 670,108  L 670,122
+        L 695,122  L 695,95
+        L 725,95   L 725,108
+        L 750,108  L 750,78
+        L 780,78   L 780,95
+        L 805,95   L 805,75
+        L 830,75   L 830,95
+        L 855,95   L 855,115
+        L 875,115  L 875,92
+        L 893,75   L 910,75
+        L 928,92   L 945,92
+        L 945,112  L 965,112
+        L 965,130  L 990,130
+        L 990,145  L 1015,145
+        L 1015,135 L 1040,135
+        L 1040,150 L 1065,150
+        L 1065,162 L 1095,162
+        L 1095,172 L 1130,172
+        L 1130,183 L 1165,183
+        L 1165,192 L 1210,192
+        L 1210,202 L 1260,202
+        L 1260,210 L 1440,210
+        L 1440,300
+        Z
+      "/>
+
+      <!-- Lit windows — left buildings -->
+      <rect x="63"  y="165" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="115" y="155" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="165" y="147" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="165" y="154" width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="210" y="140" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="245" y="110" width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="245" y="118" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+
+      <!-- John Hancock Tower (slim, blue-glass reflective) -->
+      <rect x="273" y="45"  width="2" height="2" fill="#c8e8ff" opacity="0.6"/>
+      <rect x="273" y="55"  width="2" height="2" fill="#c8e8ff" opacity="0.8"/>
+      <rect x="273" y="65"  width="2" height="2" fill="#c8e8ff" opacity="0.5"/>
+      <rect x="273" y="75"  width="2" height="2" fill="#c8e8ff" opacity="0.7"/>
+      <rect x="273" y="85"  width="2" height="2" fill="#c8e8ff" opacity="0.6"/>
+      <rect x="273" y="95"  width="2" height="2" fill="#c8e8ff" opacity="0.8"/>
+      <rect x="273" y="105" width="2" height="2" fill="#c8e8ff" opacity="0.5"/>
+      <rect x="277" y="50"  width="2" height="2" fill="#c8e8ff" opacity="0.4"/>
+      <rect x="277" y="70"  width="2" height="2" fill="#c8e8ff" opacity="0.6"/>
+      <rect x="277" y="90"  width="2" height="2" fill="#c8e8ff" opacity="0.5"/>
+
+      <!-- Prudential Tower -->
+      <rect x="372" y="52"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="372" y="65"  width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="372" y="78"  width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="372" y="90"  width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="372" y="103" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="372" y="115" width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="372" y="128" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="382" y="58"  width="3" height="2" fill="#ffd060" opacity="0.4"/>
+      <rect x="382" y="70"  width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="382" y="83"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="382" y="95"  width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="382" y="108" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="382" y="120" width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="393" y="52"  width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="393" y="65"  width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="393" y="78"  width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="393" y="103" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="404" y="60"  width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="404" y="73"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="404" y="85"  width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="404" y="98"  width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="404" y="110" width="3" height="2" fill="#ffd060" opacity="0.4"/>
+      <rect x="416" y="55"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="416" y="68"  width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="416" y="80"  width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="416" y="92"  width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="416" y="105" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="416" y="118" width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="416" y="130" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+
+      <!-- Antenna beacon -->
+      <circle cx="395" cy="2" r="2" fill="#ff4444" opacity="0.9"/>
+
+      <!-- Mid-section windows -->
+      <rect x="500" y="138" width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="545" y="132" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="595" y="128" width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="620" y="126" width="3" height="2" fill="#ffd060" opacity="0.5"/>
+
+      <!-- Downtown cluster windows -->
+      <rect x="648" y="113" width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="648" y="123" width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="700" y="100" width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="710" y="98"  width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="755" y="85"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="765" y="82"  width="3" height="2" fill="#ffd060" opacity="0.8"/>
+      <rect x="810" y="80"  width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="820" y="78"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+      <rect x="878" y="100" width="3" height="2" fill="#ffd060" opacity="0.6"/>
+      <rect x="900" y="80"  width="3" height="2" fill="#ffd060" opacity="0.5"/>
+      <rect x="912" y="78"  width="3" height="2" fill="#ffd060" opacity="0.7"/>
+
+      <!-- Water light reflections -->
+      <rect x="277" y="220" width="2" height="12" fill="#c8e8ff" opacity="0.12"/>
+      <rect x="383" y="218" width="3" height="16" fill="#ffd060" opacity="0.10"/>
+      <rect x="395" y="218" width="2" height="10" fill="#ff4444" opacity="0.15"/>
+      <rect x="760" y="220" width="3" height="14" fill="#ffd060" opacity="0.10"/>
+      <rect x="815" y="220" width="3" height="14" fill="#ffd060" opacity="0.08"/>
+    </svg>
+
+  </div><!-- end .hero -->
+
+  <!-- Bio -->
+  <div class="content" id="about">
+    <h2 class="bio-heading">About Me</h2>
+    <div class="bio">
+      <p>Strategic Finance &amp; Operations Analyst with a track record of driving meaningful operational improvements across finance and revenue functions.</p>
+      <p>I've helped transform accounting processes that resulted in a 6-day reduction in the month-end close cycle and a full month shaved off the annual audit timeline — freeing up teams to focus on higher-value work. I also played a key role in a successful revenue operations transformation, aligning people, processes, and systems to support scalable growth.</p>
+      <p>Beyond operations, I bring experience in corporate development and M&amp;A — supporting deals from diligence through integration.</p>
+      <p>I'm energized by complex problems. I thrive on untangling intricate processes, identifying where inefficiencies hide, and building leaner, more effective ways of working — turning operational complexity into a clear path forward.</p>
+    </div>
+  </div>
+
+  <!-- Boston Daytime Skyline -->
+  <div class="skyline-photo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice" style="width:100%;display:block;">
+      <defs>
+        <linearGradient id="skyDay" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a8ec8"/>
+          <stop offset="60%" stop-color="#7ec0e8"/>
+          <stop offset="100%" stop-color="#b8ddf5"/>
+        </linearGradient>
+        <linearGradient id="waterDay" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a8fbe"/>
+          <stop offset="100%" stop-color="#1e5a88"/>
+        </linearGradient>
+        <linearGradient id="hancockGlass" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#2e6aaa"/>
+          <stop offset="40%" stop-color="#6aafd8"/>
+          <stop offset="100%" stop-color="#3a7ec0"/>
+        </linearGradient>
+        <linearGradient id="prudGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#9ab0c0"/>
+          <stop offset="100%" stop-color="#6a8298"/>
+        </linearGradient>
+        <linearGradient id="bldgA" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a0b2c2"/>
+          <stop offset="100%" stop-color="#7a8fa0"/>
+        </linearGradient>
+        <linearGradient id="bldgB" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#b0bec8"/>
+          <stop offset="100%" stop-color="#8898a8"/>
+        </linearGradient>
+        <linearGradient id="bldgC" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c8cfd6"/>
+          <stop offset="100%" stop-color="#9aaab8"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Sky -->
+      <rect width="1440" height="400" fill="url(#skyDay)"/>
+
+      <!-- Clouds -->
+      <ellipse cx="180" cy="58"  rx="88" ry="26" fill="white" opacity="0.88"/>
+      <ellipse cx="228" cy="48"  rx="60" ry="22" fill="white" opacity="0.92"/>
+      <ellipse cx="140" cy="66"  rx="52" ry="18" fill="white" opacity="0.80"/>
+      <ellipse cx="660" cy="42"  rx="75" ry="24" fill="white" opacity="0.82"/>
+      <ellipse cx="708" cy="34"  rx="48" ry="19" fill="white" opacity="0.86"/>
+      <ellipse cx="620" cy="50"  rx="40" ry="16" fill="white" opacity="0.75"/>
+      <ellipse cx="1120" cy="68" rx="95" ry="29" fill="white" opacity="0.78"/>
+      <ellipse cx="1175" cy="56" rx="62" ry="23" fill="white" opacity="0.82"/>
+      <ellipse cx="1068" cy="76" rx="50" ry="18" fill="white" opacity="0.72"/>
+      <ellipse cx="1340" cy="44" rx="65" ry="20" fill="white" opacity="0.78"/>
+
+      <!-- ── BUILDINGS (back layer, lighter) ── -->
+      <rect x="0"    y="212" width="42"  height="50"  fill="#c8d4de"/>
+      <rect x="46"   y="200" width="38"  height="62"  fill="#bccad4"/>
+      <rect x="88"   y="195" width="45"  height="67"  fill="#c2ceda"/>
+      <rect x="500"  y="195" width="55"  height="67"  fill="#c0ccda"/>
+      <rect x="560"  y="185" width="50"  height="77"  fill="#b8c8d6"/>
+      <rect x="620"  y="200" width="48"  height="62"  fill="#c4d0dc"/>
+      <rect x="950"  y="200" width="60"  height="62"  fill="#bccad4"/>
+      <rect x="1015" y="210" width="50"  height="52"  fill="#c2cede"/>
+      <rect x="1070" y="204" width="55"  height="58"  fill="#b8c8d6"/>
+
+      <!-- ── BUILDINGS (front layer) ── -->
+
+      <!-- Far-left low cluster -->
+      <rect x="0"   y="200" width="38"  height="62"  fill="url(#bldgB)"/>
+      <rect x="42"  y="188" width="36"  height="74"  fill="url(#bldgA)"/>
+      <rect x="82"  y="175" width="40"  height="87"  fill="url(#bldgC)"/>
+      <rect x="126" y="182" width="36"  height="80"  fill="url(#bldgB)"/>
+      <rect x="166" y="160" width="38"  height="102" fill="url(#bldgA)"/>
+      <rect x="208" y="170" width="34"  height="92"  fill="url(#bldgC)"/>
+      <rect x="246" y="145" width="18"  height="117" fill="url(#bldgB)"/>
+
+      <!-- Building before Hancock -->
+      <rect x="248" y="130" width="16"  height="132" fill="url(#bldgA)"/>
+
+      <!-- John Hancock Tower — slim blue reflective glass -->
+      <rect x="264" y="52"  width="22"  height="210" fill="url(#hancockGlass)"/>
+      <!-- Glass reflections / window bands -->
+      <rect x="264" y="52"  width="22"  height="3"   fill="white" opacity="0.15"/>
+      <rect x="264" y="68"  width="22"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="264" y="84"  width="22"  height="2"   fill="white" opacity="0.10"/>
+      <rect x="264" y="100" width="22"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="264" y="116" width="22"  height="2"   fill="white" opacity="0.10"/>
+      <rect x="264" y="132" width="22"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="264" y="148" width="22"  height="2"   fill="white" opacity="0.10"/>
+      <rect x="264" y="164" width="22"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="264" y="180" width="22"  height="2"   fill="white" opacity="0.10"/>
+      <rect x="264" y="196" width="22"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="264" y="212" width="22"  height="2"   fill="white" opacity="0.10"/>
+      <!-- Dark vertical seam -->
+      <rect x="274" y="52"  width="1"   height="210" fill="#1a4a80" opacity="0.4"/>
+
+      <!-- Buildings between Hancock and Prudential -->
+      <rect x="290" y="148" width="35"  height="114" fill="url(#bldgB)"/>
+      <rect x="329" y="135" width="32"  height="127" fill="url(#bldgA)"/>
+      <rect x="360" y="150" width="8"   height="112" fill="url(#bldgC)"/>
+
+      <!-- Prudential Tower -->
+      <rect x="368" y="50"  width="72"  height="212" fill="url(#prudGrad)"/>
+      <!-- Crown / setback -->
+      <rect x="378" y="38"  width="52"  height="14"  fill="#8a9fb0"/>
+      <!-- Antenna -->
+      <rect x="402" y="5"   width="4"   height="35"  fill="#6a8298"/>
+      <!-- Window grid on Prudential -->
+      <rect x="368" y="65"  width="72"  height="2"   fill="white" opacity="0.18"/>
+      <rect x="368" y="82"  width="72"  height="2"   fill="white" opacity="0.14"/>
+      <rect x="368" y="99"  width="72"  height="2"   fill="white" opacity="0.18"/>
+      <rect x="368" y="116" width="72"  height="2"   fill="white" opacity="0.14"/>
+      <rect x="368" y="133" width="72"  height="2"   fill="white" opacity="0.18"/>
+      <rect x="368" y="150" width="72"  height="2"   fill="white" opacity="0.14"/>
+      <rect x="368" y="167" width="72"  height="2"   fill="white" opacity="0.18"/>
+      <rect x="368" y="184" width="72"  height="2"   fill="white" opacity="0.14"/>
+      <rect x="368" y="201" width="72"  height="2"   fill="white" opacity="0.18"/>
+      <rect x="368" y="218" width="72"  height="2"   fill="white" opacity="0.14"/>
+      <rect x="385" y="50"  width="2"   height="212" fill="white" opacity="0.08"/>
+      <rect x="402" y="50"  width="2"   height="212" fill="white" opacity="0.08"/>
+      <rect x="419" y="50"  width="2"   height="212" fill="white" opacity="0.08"/>
+
+      <!-- Mid Back Bay buildings -->
+      <rect x="444" y="162" width="38"  height="100" fill="url(#bldgA)"/>
+      <rect x="486" y="148" width="36"  height="114" fill="url(#bldgB)"/>
+      <rect x="526" y="155" width="40"  height="107" fill="url(#bldgC)"/>
+      <rect x="570" y="140" width="38"  height="122" fill="url(#bldgA)"/>
+      <rect x="612" y="150" width="36"  height="112" fill="url(#bldgB)"/>
+      <rect x="652" y="135" width="42"  height="127" fill="url(#bldgC)"/>
+
+      <!-- Downtown cluster -->
+      <rect x="698" y="118" width="38"  height="144" fill="url(#bldgA)"/>
+      <rect x="740" y="105" width="35"  height="157" fill="url(#bldgB)"/>
+      <rect x="779" y="92"  width="36"  height="170" fill="url(#prudGrad)"/>
+      <!-- Window bands on tall downtown tower -->
+      <rect x="779" y="106" width="36"  height="2"   fill="white" opacity="0.15"/>
+      <rect x="779" y="120" width="36"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="779" y="134" width="36"  height="2"   fill="white" opacity="0.15"/>
+      <rect x="779" y="148" width="36"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="779" y="162" width="36"  height="2"   fill="white" opacity="0.15"/>
+      <rect x="779" y="176" width="36"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="779" y="190" width="36"  height="2"   fill="white" opacity="0.15"/>
+      <rect x="779" y="204" width="36"  height="2"   fill="white" opacity="0.12"/>
+      <rect x="819" y="108" width="34"  height="154" fill="url(#bldgC)"/>
+      <rect x="857" y="95"  width="36"  height="167" fill="url(#bldgA)"/>
+      <!-- One International Place — rounded top approximation -->
+      <rect x="897" y="105" width="38"  height="157" fill="url(#bldgB)"/>
+      <ellipse cx="916" cy="106" rx="19" ry="10"     fill="url(#bldgB)"/>
+      <rect x="939" y="118" width="34"  height="144" fill="url(#bldgC)"/>
+
+      <!-- Waterfront / Harbor buildings (decreasing) -->
+      <rect x="977"  y="145" width="38"  height="117" fill="url(#bldgA)"/>
+      <rect x="1019" y="158" width="36"  height="104" fill="url(#bldgB)"/>
+      <rect x="1059" y="165" width="40"  height="97"  fill="url(#bldgC)"/>
+      <rect x="1103" y="175" width="36"  height="87"  fill="url(#bldgA)"/>
+      <rect x="1143" y="183" width="38"  height="79"  fill="url(#bldgB)"/>
+      <rect x="1185" y="192" width="34"  height="70"  fill="url(#bldgC)"/>
+      <rect x="1223" y="200" width="36"  height="62"  fill="url(#bldgA)"/>
+      <rect x="1263" y="208" width="38"  height="54"  fill="url(#bldgB)"/>
+      <rect x="1305" y="215" width="40"  height="47"  fill="url(#bldgC)"/>
+      <rect x="1349" y="222" width="48"  height="40"  fill="url(#bldgA)"/>
+      <rect x="1400" y="228" width="40"  height="34"  fill="url(#bldgB)"/>
+
+      <!-- Water -->
+      <rect x="0" y="262" width="1440" height="138" fill="url(#waterDay)"/>
+
+      <!-- Water shimmer / ripples -->
+      <rect x="0"    y="270" width="1440" height="2" fill="white" opacity="0.08"/>
+      <rect x="0"    y="285" width="1440" height="1" fill="white" opacity="0.06"/>
+      <rect x="0"    y="305" width="800"  height="1" fill="white" opacity="0.05"/>
+      <rect x="200"  y="322" width="600"  height="1" fill="white" opacity="0.04"/>
+      <rect x="500"  y="340" width="500"  height="1" fill="white" opacity="0.04"/>
+
+      <!-- Blue sky reflection in water -->
+      <rect x="0" y="262" width="1440" height="30" fill="#6ab0d8" opacity="0.25"/>
+    </svg>
+  </div>
+
+  <!-- Contact -->
+  <div class="contact" id="contact">
+    <h2 class="contact-heading">Contact</h2>
+    <div class="contact-links">
+      <a class="contact-link" href="https://www.linkedin.com/in/davidben-ezra/" target="_blank" rel="noopener noreferrer">
+        <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+          <rect width="72" height="72" rx="8" fill="#0a66c2"/>
+          <path fill="#ffffff" d="M13.5 27h9v31.5h-9zM18 22.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm33 36h-9V43.1c0-3.5-.1-8-4.9-8-4.9 0-5.6 3.8-5.6 7.8V58.5h-9V27h8.6v4.1h.1c1.2-2.3 4.1-4.7 8.5-4.7 9.1 0 10.8 6 10.8 13.7V58.5z"/>
+        </svg>
+        LinkedIn
+      </a>
+      <a class="contact-link" href="mailto:david.ezra@outlook.com">
+        <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+          <rect width="72" height="72" rx="8" fill="#0078d4"/>
+          <path fill="#ffffff" d="M12 22h48v28H12V22zm24 16 20-13H16l20 13zm0 4L14 28v18h44V28L36 42z"/>
+        </svg>
+        david.ezra@outlook.com
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; 2026 David Ben-Ezra
+  </div>
+
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const navDrawer = document.getElementById('navDrawer');
+
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('open');
+      navDrawer.classList.toggle('open');
+    });
+
+    // Close drawer when any nav link is clicked
+    navDrawer.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        menuBtn.classList.remove('open');
+        navDrawer.classList.remove('open');
+      });
+    });
+
+    // Close drawer when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!navDrawer.contains(e.target) && !menuBtn.contains(e.target)) {
+        menuBtn.classList.remove('open');
+        navDrawer.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>
